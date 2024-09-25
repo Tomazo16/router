@@ -1,7 +1,12 @@
 {
     "name": "tomazo/router",
     "description": "A lightweight PHP router with middleware support for web applications.",
+    "keywords": ["router"],
     "type": "library",
+    "authors": [{
+        "name": "Tomasz Talar",
+        "email": "tomasztalar90@gmail.com"
+    }],
     "require": {
         "php": ">=8.1"
     },
@@ -14,8 +19,9 @@
             "Tomazo\\Router\\": "src/"
         }
     },
-    "authors": [{
-        "name": "Tomasz Talar",
-        "email": "tomasztalar90@gmail.com"
-    }]
+    "autoload-dev": {
+        "psr-4": {
+            "Tomazo\\TestRouter\\": "tests/"
+        }
+    }
 }
