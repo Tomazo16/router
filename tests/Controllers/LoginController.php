@@ -2,7 +2,7 @@
 
 namespace Tomazo\TestRouter\Controllers;
 
-use Tomazo\Route\Attribute\Route;
+use Tomazo\Router\Attribute\Route;
 
 class LoginController
 {

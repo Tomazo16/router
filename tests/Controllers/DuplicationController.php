@@ -6,9 +6,9 @@ use Tomazo\Router\Attribute\Route;
 
 class DuplicationController
 {
-    #[Route('/a', name: 'a')]
+    #[Route('/a', name: 'dupl')]
     public function a() {}
 
-    #[Route('/a', name: 'a')]
+    #[Route('/b', name: 'dupl')]
     public function b() {}
 }

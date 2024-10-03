@@ -10,7 +10,7 @@ use Tomazo\TestRouter\Controllers\LoginController;
 use Tomazo\TestRouter\Controllers\TestController;
 use Tomazo\TestRouter\Controllers\DuplicationController;
 use Tomazo\TestRouter\Controllers\RecordController;
-use Tomazo\TestRouter\TestController\NoRouteController;
+use Tomazo\TestRouter\Controllers\NoRouteController;
 use Tomazo\Router\Exceptions\RouteDuplicationException;
 use Tomazo\Router\Exceptions\NoControllersException;
 use Tomazo\Router\Exceptions\NoRoutesException;
@@ -34,16 +34,17 @@ class RouterUnitTest extends TestCase
         //get attributes from method
         $attributes  = $reflectionMethod->getAttributes(Route::class);
 
-        //assert whether method has attribube Route
+        //assert whether method has attribute Route
         $this->assertNotEmpty($attributes, "Method 'index' dont have adnotation Route");
 
         $this->testControllerRouteLoader->registerController(IndexController::class);
 
-        $router = new Router($this->testControllerRouteLoader, SimpleRouteResolver::class);
+        $router = new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
 
         $expectedRoutes = [
             [
-                'method' => 'GET',
+                'name' => 'index',
+                'method' => ['GET'],
                 'route' => '/index',
                 'action' => [new IndexController(), 'index']
             ]
@@ -69,22 +70,25 @@ class RouterUnitTest extends TestCase
         $this->testControllerRouteLoader->registerController(IndexController::class);
         $this->testControllerRouteLoader->registerController(LoginController::class);
     
-        $router = new Router($this->testControllerRouteLoader, SimpleRouteResolver::class);
+        $router = new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
 
         $expectedRoutes = [
             [
-                'method' => 'GET',
+                'name' => 'index',
+                'method' => ['GET'],
                 'route' => '/index',
                 'action' => [new IndexController(), 'index']
             ],
             [
-                'method' => 'GET',
+                'name' => 'login',
+                'method' => ['GET'],
                 'route' => '/login',
                 'action' => [new LoginController(), 'login']
             ],
             [
-                'method' => 'GET',
-                'route' => '/login',
+                'name' => 'logout',
+                'method' => ['GET'],
+                'route' => '/logout',
                 'action' => [new LoginController(), 'logout']
             ]
         ];
@@ -102,7 +106,7 @@ class RouterUnitTest extends TestCase
     {
             $this->testControllerRouteLoader->registerController(TestController::class);
 
-            $router = new Router($this->testControllerRouteLoader, SimpleRouteResolver::class);
+            $router = new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
 
             $routes = $router->getRoutes();
 
@@ -118,14 +122,14 @@ class RouterUnitTest extends TestCase
     {
         $this->testControllerRouteLoader->registerController(TestController::class);
 
-        $router = new Router($this->testControllerRouteLoader, SimpleRouteResolver::class);
+        $router = new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
 
         $routes = $router->getRoutes();
        
         // Search for the route matching '/t/index' with the GET method.
         $routeFound = false;
         foreach($routes as $route) {
-            if($route['route'] === '/t/index' && $route['method'] === 'GET') {
+            if($route['route'] === '/t/index' && $route['method'] === ['GET']) {
                 $routeFound = true;
                 break;
             }
@@ -137,7 +141,7 @@ class RouterUnitTest extends TestCase
          // Search for the route matching '/test' with the POST method from method testMethod.
          $routeFound = false;
          foreach($routes as $route) {
-             if($route['route'] === '/test' && $route['method'] === 'POST') {
+             if($route['route'] === '/test' && $route['method'] === ['POST']) {
                  $routeFound = true;
                  break;
              }
@@ -151,12 +155,12 @@ class RouterUnitTest extends TestCase
     {
 
         $this->expectException(RouteDuplicationException::class);
-        $this->expectExceptionMessage("Route duplication detected for route '\a' with method 'GET'.");
-        $this->expectExceptionCode(404);
+        $this->expectExceptionMessage("Route duplication detected. Route: 'dupl' with path '/a' already exists (method: b).");
+        $this->expectExceptionCode(500);
 
         $this->testControllerRouteLoader->registerController(DuplicationController::class);
 
-        new Router($this->testControllerRouteLoader, SimpleRouteResolver::class);
+        new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
 
     }
 
@@ -164,9 +168,9 @@ class RouterUnitTest extends TestCase
     {
         $this->expectException(NoControllersException::class);
         $this->expectExceptionMessage("No controllers detected in direction ''.");
-        $this->expectExceptionCode(404);
+        $this->expectExceptionCode(500);
 
-        new Router($this->testControllerRouteLoader, SimpleRouteResolver::class);
+        new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
 
     }
 
@@ -176,10 +180,10 @@ class RouterUnitTest extends TestCase
         
         $this->expectException(NoRoutesException::class);
         $this->expectExceptionMessage("No routes detected in direction ''.");
-        $this->expectExceptionCode(404);
+        $this->expectExceptionCode(500);
 
         $this->testControllerRouteLoader->registerController(NoRouteController::class);
-        new Router($this->testControllerRouteLoader, SimpleRouteResolver::class);
+        new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
     }
 
     public function testRouteWithParameters(): void
@@ -187,11 +191,12 @@ class RouterUnitTest extends TestCase
 
         $this->testControllerRouteLoader->registerController(RecordController::class);
 
-        $router = new Router($this->testControllerRouteLoader, SimpleRouteResolver::class);
+        $router = new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
 
         $expectedRoutes = [
             [
-                'method' => 'GET',
+                'name' => 'show',
+                'method' => ['GET'],
                 'route' => '/test/show/{id}',
                 'action' => [new RecordController(), 'show']
             ]
