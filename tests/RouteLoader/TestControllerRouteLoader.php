@@ -9,11 +9,6 @@ class TestControllerRouteLoader extends ControllerRouteLoader
 {
     private $controllers = [];
 
-    public function __construct()
-    {
-        
-    }
-
     public function registerController($controller): void
     {
         $this->controllers[] = $controller;
@@ -23,10 +18,10 @@ class TestControllerRouteLoader extends ControllerRouteLoader
     {
 
         foreach($this->controllers as $controller) {
-            $this->registerRoutesForController(new $controller);
+            $this->registerRoutesForController($controller);
         }
         if(empty($this->controllers)) {
-            throw new NoControllersException($this->controllersPath);
+            throw new NoControllersException($this->namespace, $this->controllersPath);
         }
         return $this->routes;
     }

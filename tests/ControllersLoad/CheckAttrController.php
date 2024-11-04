@@ -1,6 +1,6 @@
 <?php 
 
-namespace Tomazo\TestRouter\Controllers;
+namespace Tomazo\TestRouter\ControllersLoad;
 
 use Tomazo\Router\Attribute\Route;
 

@@ -8,13 +8,14 @@ use Tomazo\TestRouter\RouteLoader\TestControllerRouteLoader;
 use Tomazo\TestRouter\Controllers\IndexController;
 use Tomazo\TestRouter\Controllers\LoginController;
 use Tomazo\TestRouter\Controllers\TestController;
+use Tomazo\TestRouter\Controllers\CheckAttrController;
 use Tomazo\TestRouter\Controllers\DuplicationController;
 use Tomazo\TestRouter\Controllers\RecordController;
 use Tomazo\TestRouter\Controllers\NoRouteController;
 use Tomazo\Router\Exceptions\RouteDuplicationException;
 use Tomazo\Router\Exceptions\NoControllersException;
 use Tomazo\Router\Exceptions\NoRoutesException;
-
+use Tomazo\Router\RouteLoader\ControllerRouteLoader;
 
 class RouterUnitTest extends TestCase
 {
@@ -22,7 +23,17 @@ class RouterUnitTest extends TestCase
 
     public function setUp(): void
     {
-        $this->testControllerRouteLoader = new TestControllerRouteLoader();
+        $this->testControllerRouteLoader = new TestControllerRouteLoader('','');
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        
+        // Clearing superglobal arrays after each test
+        $_POST = [];
+        $_GET = [];
+        $_SERVER = [];
     }
 
     public function testGetIndexRoute(): void
@@ -46,7 +57,7 @@ class RouterUnitTest extends TestCase
                 'name' => 'index',
                 'method' => ['GET'],
                 'route' => '/index',
-                'action' => [new IndexController(), 'index']
+                'action' => [IndexController::class, 'index']
             ]
         ];
 
@@ -77,19 +88,19 @@ class RouterUnitTest extends TestCase
                 'name' => 'index',
                 'method' => ['GET'],
                 'route' => '/index',
-                'action' => [new IndexController(), 'index']
+                'action' => [IndexController::class, 'index']
             ],
             [
                 'name' => 'login',
                 'method' => ['GET'],
                 'route' => '/login',
-                'action' => [new LoginController(), 'login']
+                'action' => [LoginController::class, 'login']
             ],
             [
                 'name' => 'logout',
                 'method' => ['GET'],
                 'route' => '/logout',
-                'action' => [new LoginController(), 'logout']
+                'action' => [LoginController::class, 'logout']
             ]
         ];
 
@@ -167,7 +178,7 @@ class RouterUnitTest extends TestCase
     public function testNoControllersAvailable(): void
     {
         $this->expectException(NoControllersException::class);
-        $this->expectExceptionMessage("No controllers detected in direction ''.");
+        $this->expectExceptionMessage("No controllers detected in direction '' or namespace ''.");
         $this->expectExceptionCode(500);
 
         new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
@@ -179,7 +190,7 @@ class RouterUnitTest extends TestCase
         
         
         $this->expectException(NoRoutesException::class);
-        $this->expectExceptionMessage("No routes detected in direction ''.");
+        $this->expectExceptionMessage("No routes detected in direction '' or namespace ''.");
         $this->expectExceptionCode(500);
 
         $this->testControllerRouteLoader->registerController(NoRouteController::class);
@@ -198,7 +209,7 @@ class RouterUnitTest extends TestCase
                 'name' => 'show',
                 'method' => ['GET'],
                 'route' => '/test/show/{id}',
-                'action' => [new RecordController(), 'show']
+                'action' => [RecordController::class, 'show']
             ]
         ];
 
@@ -206,4 +217,16 @@ class RouterUnitTest extends TestCase
         
         $this->assertEquals($expectedRoutes, $routes);
     }
+
+    public function testControllerRouteLoader(): void
+    {
+        $controllerRouteLoader = new ControllerRouteLoader('Tomazo\TestRouter\ControllersLoad',__DIR__ . '/../ControllersLoad');
+
+        $router = new Router($controllerRouteLoader, new SimpleRouteResolver());
+
+        $routes = $router->getRoutes();
+
+        $this->assertEquals(6, count($routes));
+    }
+  
 }
