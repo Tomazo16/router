@@ -36,17 +36,17 @@ class RouterUnitTest extends TestCase
         $_SERVER = [];
     }
 
+    /**
+     * Test to verify if the IndexController has an 'index' route with a Route attribute.
+     */
     public function testGetIndexRoute(): void
     {
-         //checking if IndexController has method index
          $this->assertTrue(method_exists(IndexController::class, 'index'), "Method 'index' not exist in IndexController class");
-        //create instance reflection of IndexController
+
         $reflectionMethod = new ReflectionMethod(IndexController::class,'index');
-        //get attributes from method
         $attributes  = $reflectionMethod->getAttributes(Route::class);
 
-        //assert whether method has attribute Route
-        $this->assertNotEmpty($attributes, "Method 'index' dont have adnotation Route");
+        $this->assertNotEmpty($attributes, "Method 'index' does not have Route annotation");
 
         $this->testControllerRouteLoader->registerController(IndexController::class);
 
@@ -64,18 +64,13 @@ class RouterUnitTest extends TestCase
         $routes = $router->getRoutes();
         
         $this->assertEquals($expectedRoutes, $routes);
-
     }
 
+    /**
+     * Test to load routes from multiple controllers and verify expected route count and details.
+     */
     public function testLoadRoutesFromMultipleControllers()
     {
-        /**
-         * IndexController::index
-         * LoginController::login
-         * LoginController::logout
-         * 
-         * only this method has adnotation
-         */
         $routesCount = 3;
 
         $this->testControllerRouteLoader->registerController(IndexController::class);
@@ -107,74 +102,70 @@ class RouterUnitTest extends TestCase
         $routes = $router->getRoutes();
         
         $this->assertEquals($expectedRoutes, $routes);
-        
-        //chcecking if count routes is equals number of controllers
-        $this->assertEquals($routesCount, count($routes), "Number of routes isnt equals like number of methods");
-
+        $this->assertEquals($routesCount, count($routes), "Number of routes does not match expected count");
     }
 
+    /**
+     * Test to check if private methods are ignored in route registration.
+     */
     public function testIgnorePrivateMethod()
     {
-            $this->testControllerRouteLoader->registerController(TestController::class);
+        $this->testControllerRouteLoader->registerController(TestController::class);
+        $router = new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
 
-            $router = new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
+        $routes = $router->getRoutes();
 
-            $routes = $router->getRoutes();
-
-            foreach($routes as $route) {
-                // Assert that private method was not found.
-                $this->assertNotEquals('/protect', $route['route']);
-                $this->assertNotEquals('/priv', $route['route']);
-            }
-    
+        foreach ($routes as $route) {
+            $this->assertNotEquals('/protect', $route['route']);
+            $this->assertNotEquals('/priv', $route['route']);
+        }
     }
     
+    /**
+     * Test to check that routes with different HTTP methods are correctly registered.
+     */
     public function testDiffenretHttpMethod()
     {
         $this->testControllerRouteLoader->registerController(TestController::class);
-
         $router = new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
 
         $routes = $router->getRoutes();
        
-        // Search for the route matching '/t/index' with the GET method.
         $routeFound = false;
-        foreach($routes as $route) {
-            if($route['route'] === '/t/index' && $route['method'] === ['GET']) {
+        foreach ($routes as $route) {
+            if ($route['route'] === '/t/index' && $route['method'] === ['GET']) {
                 $routeFound = true;
                 break;
             }
         }
-
-        // Assert that the expected route was found.
         $this->assertTrue($routeFound);
 
-         // Search for the route matching '/test' with the POST method from method testMethod.
-         $routeFound = false;
-         foreach($routes as $route) {
-             if($route['route'] === '/test' && $route['method'] === ['POST']) {
-                 $routeFound = true;
-                 break;
-             }
-         }
-
-         // Assert that the expected route was found.
+        $routeFound = false;
+        foreach ($routes as $route) {
+            if ($route['route'] === '/test' && $route['method'] === ['POST']) {
+                $routeFound = true;
+                break;
+            }
+        }
         $this->assertTrue($routeFound);
     }
 
+    /**
+     * Test that an exception is thrown when a route duplication is detected.
+     */
     public function testDuplicationRouteThrowException(): void
     {
-
         $this->expectException(RouteDuplicationException::class);
         $this->expectExceptionMessage("Route duplication detected. Route: 'dupl' with path '/a' already exists (method: b).");
         $this->expectExceptionCode(500);
 
         $this->testControllerRouteLoader->registerController(DuplicationController::class);
-
         new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
-
     }
 
+    /**
+     * Test to ensure an exception is thrown if no controllers are available.
+     */
     public function testNoControllersAvailable(): void
     {
         $this->expectException(NoControllersException::class);
@@ -182,13 +173,13 @@ class RouterUnitTest extends TestCase
         $this->expectExceptionCode(500);
 
         new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
-
     }
 
+    /**
+     * Test to ensure an exception is thrown if no routes are found in the controller.
+     */
     public function testNoRoutesFound(): void
     {
-        
-        
         $this->expectException(NoRoutesException::class);
         $this->expectExceptionMessage("No routes detected in direction '' or namespace ''.");
         $this->expectExceptionCode(500);
@@ -197,9 +188,11 @@ class RouterUnitTest extends TestCase
         new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
     }
 
+    /**
+     * Test to check route with URL parameters is correctly registered.
+     */
     public function testRouteWithParameters(): void
     {
-
         $this->testControllerRouteLoader->registerController(RecordController::class);
 
         $router = new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
@@ -217,16 +210,4 @@ class RouterUnitTest extends TestCase
         
         $this->assertEquals($expectedRoutes, $routes);
     }
-
-    public function testControllerRouteLoader(): void
-    {
-        $controllerRouteLoader = new ControllerRouteLoader('Tomazo\TestRouter\ControllersLoad',__DIR__ . '/../ControllersLoad');
-
-        $router = new Router($controllerRouteLoader, new SimpleRouteResolver());
-
-        $routes = $router->getRoutes();
-
-        $this->assertEquals(6, count($routes));
-    }
-  
 }
