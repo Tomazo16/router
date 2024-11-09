@@ -61,20 +61,6 @@ class RouteMatcherUnitTest extends TestCase
         $this->assertFalse($routeMatcher->match(), 'Expected route not to match with extra path segment.');
     }
 
-    public function testRouteParser(): void
-    {
-        $method = new \ReflectionMethod(CheckAttrController::class, 'showDetails');
-        $path = '/test/show/Tom/details/11';
-        $routePattern = '/test/show/{name}/details/{param}';
-
-        $routeMatcher = new RouteMatcher($path, $method, $routePattern);
-        $params = $routeMatcher->parse();
-
-        //check whether the arguments are valid
-        $this->assertEquals(['name' => 'Tom', 'param' => '11'], $params);
-
-    }
-
     public function testFuncionExecute(): void
     {
         $method = new \ReflectionMethod(CheckAttrController::class, 'showDetails');

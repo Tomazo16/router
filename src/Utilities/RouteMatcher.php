@@ -3,18 +3,21 @@
 namespace Tomazo\Router\Utilities;
 
 use ReflectionMethod;
+use Tomazo\Router\Utilities\ParameterValidator\ParameterValidator;
 
 class RouteMatcher
 {
+    private ParameterValidator $parameterValidator;
+
     public function __construct(private string $path, private ReflectionMethod $method, private string $routePattern)
     {
-        
+        $this->parameterValidator = new ParameterValidator();
     }
 
     public function match(): bool
     {
         //Create a regular expression based on a route pattern
-        $parsedPharam = $this->parse();
+        $parsedPharam = PatternParser::parse($this->path, $this->routePattern);
         if($parsedPharam === null){
             return false; //The path does not match the pattern
         }
@@ -29,19 +32,14 @@ class RouteMatcher
             $value = $parsedPharam[$paramName] ?? null;
 
             //Parameter type verification
-            if($paramType === 'int' && !filter_var($value, FILTER_VALIDATE_INT)) {
-                return false; //Mismatch for int parameter
-            } elseif ($paramType === 'string' && !is_string($value)) {
-                return false; //Mismatch for string parameter
-            }
+           return ($this->parameterValidator->isValid($paramType, $value)) ? true : false;
 
-            return true;
         }
     }
 
     public function execute(): mixed
     {
-        $parameters = $this->parse();
+        $parameters = PatternParser::parse($this->path , $this-> routePattern);
 
         if($parameters === NULL){
             return false;
@@ -49,34 +47,11 @@ class RouteMatcher
 
         $methodParameters = [];
 
-        foreach($this->method->getParameters() as $param) {
-            $paramName = $param->getName();
-            $paramType = (string) $param->getType();
-
-            if(isset($parameters[$paramName])) {
-                $value = $parameters[$paramName];
-
-                if($paramType === 'int') {
-                    $methodParameters[] = (int) $value;
-                }   elseif( $paramType === 'string') {
-                    $methodParameters[] = (string) $value;
-                }
-            }
-        }
+       // Prepare the parameters for the method invocation
+       $methodParameters = $this->parameterValidator->prepareParameters($this->method, $parameters);
         
+       // Invoke the method with prepared parameters
         return $this->method->invokeArgs($this->method->getDeclaringClass()->newInstance(), $methodParameters);
     }
 
-    public function parse(): array
-    {
-        $pattern = preg_replace('/\{(\w+)\}/', '(\w+)', str_replace('/', '\/', $this->routePattern));
-        if (!preg_match('/^' . $pattern . '$/', $this->path, $matches)) {
-            return [];
-        }
-
-        // Return matched parameters as an associative array
-        preg_match_all('/\{(\w+)\}/', $this->routePattern, $paramNames);
-        array_shift($matches);
-        return array_combine($paramNames[1], $matches);
-    }
 }
