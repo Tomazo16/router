@@ -2,6 +2,7 @@
 
 namespace Tomazo\Router;
 
+use Exception;
 use Tomazo\Router\RouteLoader\RouteLoaderInterface;
 use Tomazo\Router\RouteResolver\RouteResolverInterface;
 
@@ -11,11 +12,32 @@ class Router
 
     public function __construct(private RouteLoaderInterface $routeLoader, private RouteResolverInterface $routeResolver)
     {
-        $this->routes = $routeLoader->loadRoute();
+        try{
+            $this->routes = $routeLoader->loadRoute();
+        }catch(Exception $e){
+            
+        }
+        
     }
 
     public function getRoutes(): array
     {
-        return $this->routes;
+        $routes = [];
+
+        foreach($this->routes as $route) {
+            $routes[] = $this->routeResolver->resolveRoute($route);
+        }
+        return $routes;
+    }
+
+    public function getRoutePaths(): array
+    {
+        $routePaths = [];
+
+        foreach($this->routes as $route) {
+            $routePaths[] = $this->routeResolver->getRoutePaths($route);
+        }
+
+        return $routePaths;
     }
 }

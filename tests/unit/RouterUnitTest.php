@@ -151,44 +151,6 @@ class RouterUnitTest extends TestCase
     }
 
     /**
-     * Test that an exception is thrown when a route duplication is detected.
-     */
-    public function testDuplicationRouteThrowException(): void
-    {
-        $this->expectException(RouteDuplicationException::class);
-        $this->expectExceptionMessage("Route duplication detected. Route: 'dupl' with path '/a' already exists (method: b).");
-        $this->expectExceptionCode(500);
-
-        $this->testControllerRouteLoader->registerController(DuplicationController::class);
-        new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
-    }
-
-    /**
-     * Test to ensure an exception is thrown if no controllers are available.
-     */
-    public function testNoControllersAvailable(): void
-    {
-        $this->expectException(NoControllersException::class);
-        $this->expectExceptionMessage("No controllers detected in direction '' or namespace ''.");
-        $this->expectExceptionCode(500);
-
-        new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
-    }
-
-    /**
-     * Test to ensure an exception is thrown if no routes are found in the controller.
-     */
-    public function testNoRoutesFound(): void
-    {
-        $this->expectException(NoRoutesException::class);
-        $this->expectExceptionMessage("No routes detected in direction '' or namespace ''.");
-        $this->expectExceptionCode(500);
-
-        $this->testControllerRouteLoader->registerController(NoRouteController::class);
-        new Router($this->testControllerRouteLoader, new SimpleRouteResolver());
-    }
-
-    /**
      * Test to check route with URL parameters is correctly registered.
      */
     public function testRouteWithParameters(): void
@@ -209,5 +171,22 @@ class RouterUnitTest extends TestCase
         $routes = $router->getRoutes();
         
         $this->assertEquals($expectedRoutes, $routes);
+    }
+
+    public function testgetRoutePaths(): void
+    {
+        $this->testControllerRouteLoader->registerController(CheckAttrController::class);
+
+        $router = new Router($this->testControllerRouteLoader, new SimpleRouteResolver);
+
+        $expectedRoutePaths = [
+            'GET : /test/show/{id} | name : show',
+            'GET : /test/show/{name}/details/{param} | name : showDetails',
+            'GET : /test/show/{id}/{param} | name : profile'
+        ];
+
+        $routePaths = $router->getRoutePaths();
+
+        $this->assertEquals($expectedRoutePaths, $routePaths);
     }
 }

@@ -1,31 +1,40 @@
 <?php 
 
 use PHPUnit\Framework\TestCase;
-use Tomazo\Router\RouteLoader\ControllerRouteLoader;
-use Tomazo\Router\RouteResolver\SimpleRouteResolver;
+use Tomazo\Router\Model\Route;
 use Tomazo\Router\Router;
+use Tomazo\Router\RouteLoader\RouteLoaderInterface;
+use Tomazo\Router\RouteResolver\RouteResolverInterface;
 
 class RouterIntegrationTest extends TestCase
 {
-    /**
-     * Test verifies that the ControllerRouteLoader loads exactly 6 routes 
-     * from the specified namespace and directory path for controllers.
-     */
-    public function testControllerRouteLoader(): void
+    private $routeLoaderMock;
+    private $routeResolverMock;
+    private $router;
+
+    public function setUp(): void
     {
-        // Initialize the ControllerRouteLoader with the namespace and path to controllers
-        $controllerRouteLoader = new ControllerRouteLoader(
-            'Tomazo\TestRouter\ControllersLoad', 
-            __DIR__ . '/../ControllersLoad'
-        );
+        $this->routeLoaderMock = $this->createMock(RouteLoaderInterface::class);
+        $this->routeResolverMock = $this->createMock(RouteResolverInterface::class);
+       
+    }
 
-         // Initialize the Router with the route loader and a simple route resolver
-         $router = new Router($controllerRouteLoader, new SimpleRouteResolver());
+    public function testGetRoutesReturnsResolvedRoutes(): void
+    {
+        $routesData[] = new Route('show', ['GET'], '/test/show/{id}', ['Controller', 'show']);
 
-       // Retrieve all routes
-       $routes = $router->getRoutes();
+        $this->routeLoaderMock->expects($this->once())
+            ->method('loadRoute')
+            ->willReturn($routesData);
 
-       // Assert that there are 6 routes loaded
-       $this->assertCount(6, $routes, "Expected 6 routes to be loaded.");
+        $this->routeResolverMock->expects($this->exactly(1))
+            ->method('resolveRoute')
+            ->with($routesData[0])
+            ->willReturn(['Resolved Route']);
+        
+            $this->router = new Router($this->routeLoaderMock, $this->routeResolverMock);
+        $expectedRoutes = [['Resolved Route']];
+
+        $this->assertEquals($expectedRoutes, $this->router->getRoutes());
     }
 }

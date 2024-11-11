@@ -6,7 +6,7 @@ use ReflectionMethod;
 use Tomazo\Router\RouteLoader\RouteLoaderInterface;
 use Tomazo\Router\Attribute\Route;
 use Tomazo\Router\Exceptions\NoControllersException;
-use Tomazo\Router\Helpers\RouteFactory;
+use Tomazo\Router\RouteLoader\RouteFactory;
 use Tomazo\Router\Helpers\RouteValidator;
 
 

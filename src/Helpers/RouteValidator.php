@@ -16,8 +16,8 @@ class RouteValidator
     public static function checkIsRouteExist(array $routes, string $name, string $path, string $methodName): void
     {
         foreach($routes as $route) {
-            if($route['name'] === $name || $route['route'] === $path) {
-                throw new RouteDuplicationException($name,$route['route'], $methodName);
+            if($route->getName() === $name || $route->getRoute() === $path) {
+                throw new RouteDuplicationException($name,$route->getRoute(), $methodName);
             }
         }
     } 
