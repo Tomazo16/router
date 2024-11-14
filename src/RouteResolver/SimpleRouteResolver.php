@@ -2,8 +2,10 @@
 
 namespace Tomazo\Router\RouteResolver;
 
+use Exception;
 use Tomazo\Router\Model\Route;
 use Tomazo\Router\RouteResolver\RouteResolverInterface;
+use Tomazo\Router\Utilities\RouteMatcher;
 
 class SimpleRouteResolver implements RouteResolverInterface
 {
@@ -17,9 +19,17 @@ class SimpleRouteResolver implements RouteResolverInterface
         ];
     }
 
-    public function callAction(Route $route): mixed
+    public function callAction(string $path, Route $route): mixed
     {
-        return '';
+        $method = new \ReflectionMethod($route->getAction()[0], $route->getAction()[1]);
+        $routeMatcher = new RouteMatcher($path, $method, $route->getRoute());
+
+        try{
+            return $routeMatcher->match() ? $routeMatcher->execute() : false;
+        }catch(Exception $e) {
+            
+        }
+        
     }
 
     public function getRoutePaths(Route $route): string

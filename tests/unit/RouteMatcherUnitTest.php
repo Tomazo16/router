@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use Tomazo\TestRouter\Controllers\CheckAttrController;
 use Tomazo\Router\Utilities\RouteMatcher;
+use Tomazo\Router\Exceptions\TooFewArgToFunctionException;
 
 class RouteMatcherUnitTest extends TestCase
 {
@@ -71,5 +72,19 @@ class RouteMatcherUnitTest extends TestCase
         $exec = $routeMatcher->execute();
 
         $this->assertInstanceOf(CheckAttrController::class, $exec);
+    }
+
+    public function testToofewArgToFunctionException(): void
+    {
+        $this->expectException(TooFewArgToFunctionException::class);
+        $this->expectExceptionMessage("Too few arguments to route 'profile', 1 passed and exactly 2 expected");
+        $this->expectExceptionCode(404);
+
+        $method = new \ReflectionMethod(CheckAttrController::class, 'profile');
+        $path = '/test/show/123/ert';
+        $routePattern = '/test/show/{id}/{param}';
+
+        $routeMatcher = new RouteMatcher($path, $method, $routePattern);
+        $routeMatcher->execute();
     }
 }

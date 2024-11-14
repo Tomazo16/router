@@ -30,6 +30,19 @@ class Router
         return $routes;
     }
 
+    public function getActionMethod(string $path): mixed
+    {
+        foreach ($this->routes as $route) {
+            $result = $this->routeResolver->callAction($path, $route);
+            
+            if ($result !== false) {
+                return $result;
+            }
+        }
+        
+        throw new \InvalidArgumentException("No route matches the provided path: {$path}", 404);
+    }
+
     public function getRoutePaths(): array
     {
         $routePaths = [];

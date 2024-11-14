@@ -46,7 +46,7 @@ class RouteMatcher
         }
 
         $methodParameters = [];
-
+        
        // Prepare the parameters for the method invocation
        $methodParameters = $this->parameterValidator->prepareParameters($this->method, $parameters);
         

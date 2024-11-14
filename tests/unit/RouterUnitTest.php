@@ -189,4 +189,28 @@ class RouterUnitTest extends TestCase
 
         $this->assertEquals($expectedRoutePaths, $routePaths);
     }
+
+    public function testGetActionMethod(): void
+    {
+        $path = '/test/show/123';
+
+        $this->testControllerRouteLoader->registerController(CheckAttrController::class);
+
+        $router = new Router($this->testControllerRouteLoader, new SimpleRouteResolver);
+
+        $this->assertEquals('hello world', $router->getActionMethod($path));
+    }
+
+    public function testGetActionMethodException(): void
+    {
+        $path = '/wrong/path/123';
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("No route matches the provided path: /wrong/path/123");
+        $this->expectExceptionCode(404);
+
+        $this->testControllerRouteLoader->registerController(CheckAttrController::class);
+        $router = new Router($this->testControllerRouteLoader, new SimpleRouteResolver);
+        $router->getActionMethod($path);
+    }
 }

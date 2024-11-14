@@ -3,6 +3,7 @@
 namespace Tomazo\Router\Utilities\ParameterValidator;
 
 use ReflectionMethod;
+use Tomazo\Router\Exceptions\TooFewArgToFunctionException;
 
 class ParameterValidator
 {
@@ -32,6 +33,10 @@ class ParameterValidator
             }
         }
 
+        $countParameters = count($methodParameters);
+        if($countParameters != $method->getNumberOfRequiredParameters()) {
+            throw new TooFewArgToFunctionException($method->getName(), $countParameters, $method->getNumberOfRequiredParameters());
+        }
         return $methodParameters;
     }
 }
