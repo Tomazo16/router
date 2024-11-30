@@ -59,16 +59,28 @@ class RouterIntegrationTest extends TestCase
 
     public function testEmptyRoutesList()
     {
-        // Konfiguracja mocka dla loadera tras, który zwróci pustą listę tras
+        // A mock configuration for the route loader that will return an empty list of routes
         $this->routeLoaderMock->expects($this->once())
             ->method('loadRoute')
             ->willReturn([]);
 
         $router = new Router($this->routeLoaderMock, $this->routeResolverMock); 
 
-        // Sprawdzenie, że getRoutes i getRoutePaths zwracają puste listy
+        // Checking that getRoutes and getRoutePaths return empty lists
         $this->assertEquals([], $router->getRoutes());
         $this->assertEquals([], $router->getRoutePaths());
+    }
+
+    public function testGenerateUrlWithValidParameters(): void
+    {
+        $this->routeLoaderMock->expects($this->once())
+            ->method('loadRoute')
+            ->willReturn($this->routesData);
+
+        $router = new Router($this->routeLoaderMock, $this->routeResolverMock);
+        $url = $router->generateUrl('show', ['id' => 1]);
+
+        $this->assertEquals('/test/show/1', $url);
     }
 
 }

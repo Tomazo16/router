@@ -32,9 +32,11 @@ class RouteMatcher
             $value = $parsedPharam[$paramName] ?? null;
 
             //Parameter type verification
-           return ($this->parameterValidator->isValid($paramType, $value)) ? true : false;
-
+            if(!$this->parameterValidator->isValid($paramType, $value)) {
+                throw new \InvalidArgumentException("Value '". $value ."' is not a ". $paramType, 404);
+            }
         }
+        return true;
     }
 
     public function execute(): mixed

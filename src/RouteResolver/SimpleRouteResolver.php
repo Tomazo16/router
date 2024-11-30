@@ -24,12 +24,7 @@ class SimpleRouteResolver implements RouteResolverInterface
         $method = new \ReflectionMethod($route->getAction()[0], $route->getAction()[1]);
         $routeMatcher = new RouteMatcher($path, $method, $route->getRoute());
 
-        try{
-            return $routeMatcher->match() ? $routeMatcher->execute() : false;
-        }catch(Exception $e) {
-            
-        }
-        
+        return $routeMatcher->match() ? $routeMatcher->execute() : false;
     }
 
     public function getRoutePaths(Route $route): string

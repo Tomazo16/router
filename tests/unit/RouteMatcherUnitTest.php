@@ -26,7 +26,11 @@ class RouteMatcherUnitTest extends TestCase
 
         $routeMatcher = new RouteMatcher($path, $method, $routePattern);
 
-        $this->assertFalse($routeMatcher->match(), 'Expected route not to match due to incorrect type.');
+       $this->expectException(InvalidArgumentException::class);
+       $this->expectExceptionMessage("Value 'stringInsteadOfInt' is not a int");
+       $this->expectExceptionCode(404);
+
+       $routeMatcher->match();
     }
 
     public function testRouteDoesNotMatchWithMissingSegments(): void
@@ -62,7 +66,7 @@ class RouteMatcherUnitTest extends TestCase
         $this->assertFalse($routeMatcher->match(), 'Expected route not to match with extra path segment.');
     }
 
-    public function testFuncionExecute(): void
+    public function testFunctionExecute(): void
     {
         $method = new \ReflectionMethod(CheckAttrController::class, 'showDetails');
         $path = '/test/show/Tom/details/11';
