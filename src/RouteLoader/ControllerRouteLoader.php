@@ -2,6 +2,7 @@
 
 namespace Tomazo\Router\RouteLoader;
 
+use ReflectionClass;
 use ReflectionMethod;
 use Tomazo\Router\RouteLoader\RouteLoaderInterface;
 use Tomazo\Router\Attribute\Route;
@@ -46,8 +47,13 @@ class ControllerRouteLoader implements RouteLoaderInterface
             $className = $this->namespace . '\\' . basename(str_replace('.php' , '', $file));
 
              // Check if the class exists and if so, register its routes
-            if(class_exists($className)) {
-                $this->registerRoutesForController(new $className);
+             if(class_exists($className) ) {
+                //check whether class isnt abstract class
+                $reflection = new ReflectionClass($className);
+                if(!$reflection->isAbstract()) {
+                    $this->registerRoutesForController(new $className);
+                }
+                
             }
         }
 
