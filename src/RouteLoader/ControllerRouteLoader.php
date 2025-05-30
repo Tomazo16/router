@@ -51,7 +51,7 @@ class ControllerRouteLoader implements RouteLoaderInterface
                 //check whether class isnt abstract class
                 $reflection = new ReflectionClass($className);
                 if(!$reflection->isAbstract()) {
-                    $this->registerRoutesForController(new $className);
+                    $this->registerRoutesForController($className);
                 }
                 
             }
