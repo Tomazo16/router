@@ -39,6 +39,15 @@ class RouteMatcher
         return true;
     }
 
+    public function matchMethods(array $allowedMethods): bool
+    {
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET'; //default GET
+        if (!in_array(strtoupper($method), $allowedMethods, true)) {
+            return false;
+        }
+        return true;
+    }
+
     public function execute(): mixed
     {
         $parameters = PatternParser::parse($this->path , $this-> routePattern);

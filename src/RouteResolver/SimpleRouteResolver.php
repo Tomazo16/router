@@ -24,6 +24,10 @@ class SimpleRouteResolver implements RouteResolverInterface
         $method = new \ReflectionMethod($route->getAction()[0], $route->getAction()[1]);
         $routeMatcher = new RouteMatcher($path, $method, $route->getRoute());
 
+        if ($routeMatcher->match() && !$routeMatcher->matchMethods($route->getMethod())) {
+            throw new \RuntimeException("[code: 405] Method {$_SERVER['REQUEST_METHOD']} is not allowed in route {$route->getName()}",405);
+        }
+
         return $routeMatcher->match() ? $routeMatcher->execute() : false;
     }
 
