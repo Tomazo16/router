@@ -117,26 +117,19 @@ class Router
      *                           - 'param': (array) Parameters to be passed to the URL generator.
      * @param int   $statusCode  HTTP status code for the redirect (default is 302 - Found).
      *
-     * @throws \RuntimeException If required keys are missing in the route array, key param is not a array,
-     *                           or if headers have already been sent.
+     * @throws \RuntimeException If headers have already been sent.
      *
      * @return never
      */
-    public function redirect(array $route, int $statusCode = 302): never
+    public function redirect(string $routeName, array $param = [], int $statusCode = 302): never
     {
-        if (!array_key_exists('name', $route) || !array_key_exists('param', $route)) {
-            throw new \RuntimeException("Array 'route' do not have keys 'name' or 'param'");
-        }
-        if (!is_array($route['param'])) {
-            throw new \RuntimeException("Key 'param' is not a array");
-        }
 
-        $url = $this->urlGenerator->generateUrl($route['name'], $route['param']);
+        $url = $this->urlGenerator->generateUrl($routeName, $param);
 
         if (!headers_sent()){
             header ('Location:' . $url, true, $statusCode);
             exit;
         }
-        throw new \RuntimeException("Headers already sent. Cannot redirect to {$route['name']}");
+        throw new \RuntimeException("Headers already sent. Cannot redirect to {$routeName}");
     }
 }
