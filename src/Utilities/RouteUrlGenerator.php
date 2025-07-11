@@ -38,7 +38,7 @@ class RouteUrlGenerator
              return $parameters[$paramName];
          }, $pattern);
  
-         return $this->getRoutePrefix() . $url;
+         return '/' .$this->getRoutePrefix() . $url;
     }
 
     /**
@@ -63,7 +63,7 @@ class RouteUrlGenerator
      * Returns the first segment of the request URI, including trailing slash.
      *
      * Example:
-     * URL: /ttfinance/acc/edit/38 → returns "ttfinance/"
+     * URL: /ttfinance/acc/edit/38 → returns "ttfinance"
      * URL: / → returns null
      *
      * @return string|null
@@ -77,6 +77,6 @@ class RouteUrlGenerator
         $segments = explode('/', trim($path, '/'));
 
         // Return first segment with trailing slash or null if not found
-        return isset($segments[0]) && $segments[0] !== '' ? $segments[0] . '/' : null;
+        return isset($segments[0]) && $segments[0] !== '' ? $segments[0] : null;
     }
 }
