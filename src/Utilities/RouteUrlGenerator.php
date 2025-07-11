@@ -38,7 +38,7 @@ class RouteUrlGenerator
              return $parameters[$paramName];
          }, $pattern);
  
-         return $url;
+         return $this->getRoutePrefix() . $url;
     }
 
     /**
@@ -57,5 +57,26 @@ class RouteUrlGenerator
         }
 
         throw new RouteNotFoundException($routeName);
+    }
+
+    /**
+     * Returns the first segment of the request URI, including trailing slash.
+     *
+     * Example:
+     * URL: /ttfinance/acc/edit/38 → returns "ttfinance/"
+     * URL: / → returns null
+     *
+     * @return string|null
+     */
+    public function getRoutePrefix(): ?string
+    {
+        // Get only the path (without query string, e.g., ?foo=bar)
+        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+        // Remove leading and trailing slashes, then split by "/"
+        $segments = explode('/', trim($path, '/'));
+
+        // Return first segment with trailing slash or null if not found
+        return isset($segments[0]) && $segments[0] !== '' ? $segments[0] . '/' : null;
     }
 }
